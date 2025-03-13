@@ -27,17 +27,15 @@ sys.path.append(os.path.abspath('..'))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ["sphinxcontrib.jquery",
-              'sphinx.ext.todo',
+extensions = ('sphinx.ext.todo',
               'sphinx.ext.autodoc',
               'sphinx.ext.autosummary',
               'sphinx.ext.coverage',
               'availability',
-              'deprecation',
-              ]
+              'deprecation')
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ['_templates', ]
 
 # The suffix(es) of source filenames.
 source_suffix = {'.txt': 'restructuredtext'}
@@ -85,7 +83,7 @@ today_fmt = '%d %B %Y'
 
 # List of directories, relative to source directory, that shouldn't be searched
 # for source files.
-exclude_trees = ['_build']
+exclude_trees = ('_build', )
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 default_role = 'autolink'
@@ -126,7 +124,7 @@ html_theme_options = {
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = ['.']
+# html_theme_path = ('.', )
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -147,13 +145,10 @@ html_favicon = '_static/images/sphinxdocs/phoenix_small.ico'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ('_static', )
 
-html_css_files = ["custom.css", ]
-html_js_files = ["header.js",
-                 "jquery.collapse.js",
-                 "jquery.cookie.js",
-                 "toggle_visibility.js"]
+html_css_files = ("custom.css", )
+# html_js_files = ()
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -181,7 +176,7 @@ html_additional_pages = {'gallery': 'gallery.html',
 
 html_domain_indices = {'py-modindex'}
 # A list of ignored prefixes for module index sorting.
-modindex_common_prefix = ['wx.', 'wx.lib.', 'wx.py.']
+modindex_common_prefix = ('wx.', 'wx.lib.', 'wx.py.')
 
 # If false, no index is generated.
 html_use_index = True
