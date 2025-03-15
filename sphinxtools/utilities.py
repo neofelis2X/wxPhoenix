@@ -18,6 +18,8 @@ import re
 
 import pickle
 from collections import UserDict
+from etgtools.tweaker_tools import removeWxPrefix
+from etgtools.item_module_map import ItemModuleMap
 
 # Phoenix-specific imports
 from .templates import TEMPLATE_CONTRIB
@@ -56,7 +58,8 @@ class ODict(UserDict):
 
     def __setitem__(self, key, item):
         UserDict.__setitem__(self, key, item)
-        if key not in self._keys: self._keys.append(key)
+        if key not in self._keys:
+            self._keys.append(key)
 
     def clear(self):
         UserDict.clear(self)
@@ -86,12 +89,14 @@ class ODict(UserDict):
 
     def setdefault(self, key, failobj = None):
         UserDict.setdefault(self, key, failobj)
-        if key not in self._keys: self._keys.append(key)
+        if key not in self._keys:
+            self._keys.append(key)
 
     def update(self, dict):
         UserDict.update(self, dict)
         for key in dict:
-            if key not in self._keys: self._keys.append(key)
+            if key not in self._keys:
+                self._keys.append(key)
 
     def values(self):
         return list(map(self.get, self._keys))
@@ -229,7 +234,6 @@ def pythonizeType(ptype, is_param):
 
     :rtype: `string`
     """
-    from etgtools.tweaker_tools import removeWxPrefix
 
     if 'size_t' in ptype:
         ptype = 'int'
@@ -314,8 +318,6 @@ def convertToPython(text):
 
     :rtype: `string`
     """
-    from etgtools.tweaker_tools import removeWxPrefix
-    from etgtools.item_module_map import ItemModuleMap
 
     newlines = []
     unwanted = ['Include file', '#include']
@@ -440,7 +442,6 @@ def findControlImages(elementOrString):
        file (you can find it inside the ``WIDGETS_IMAGES_ROOT`` folder.
 
     """
-    from etgtools.tweaker_tools import removeWxPrefix
 
     if isinstance(elementOrString, str):
         class_name = py_class_name = elementOrString.lower()
@@ -456,13 +457,13 @@ def findControlImages(elementOrString):
 
     appearance = ODict()
 
-    for sub_folder in ['wxmsw', 'wxmac', 'wxgtk']:
+    for sub_folder in ['msw', 'mac', 'gtk']:
 
-        png_file = class_name + '.png'
+        png_file = f"appear-{class_name}-{sub_folder}.png"
         appearance[sub_folder] = ''
 
-        possible_image = os.path.join(image_folder, sub_folder, png_file)
-        new_path = os.path.join(WIDGETS_IMAGES_ROOT, sub_folder)
+        possible_image = os.path.join(image_folder, png_file)
+        new_path = os.path.join(WIDGETS_IMAGES_ROOT, "wx" + sub_folder)
 
         py_png_file = py_class_name + '.png'
         new_file = os.path.join(new_path, py_png_file)
@@ -476,8 +477,9 @@ def findControlImages(elementOrString):
             if not os.path.isdir(new_path):
                 os.makedirs(new_path)
 
-            if not os.path.isfile(new_file):
-                shutil.copyfile(possible_image, new_file)
+            #if not os.path.isfile(new_file):
+            #    shutil.copyfile(possible_image, new_file)
+            shutil.copyfile(possible_image, new_file)
 
             appearance[sub_folder] = py_png_file
 
@@ -713,7 +715,6 @@ def wx2Sphinx(name):
 
     :param string `name`: any string.
     """
-    from etgtools.tweaker_tools import removeWxPrefix
 
     if '<' in name:
         name = name[0:name.index('<')]
@@ -728,7 +729,6 @@ def wx2Sphinx(name):
         lookup = newname
         remainder = ''
 
-    from etgtools.item_module_map import ItemModuleMap
     imm = ItemModuleMap()
     if lookup in imm:
         fullname = imm[lookup] + lookup + remainder
