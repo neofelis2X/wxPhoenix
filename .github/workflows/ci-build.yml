@@ -4,17 +4,9 @@
 # used in subsequent jobs on each supported platform and Python version.
 #---------------------------------------------------------------------------
 
-name: ci-build
+name: testrun
 
 on:
-  # Trigger on push or PRs targeting the master branch
-  push:
-    branches: [ 'master' ]
-    tags:
-      - 'wxPython-*'
-  pull_request:
-    branches: [ 'master' ]
-
   # Also allow manual triggering (via web ui)
   workflow_dispatch:
 
@@ -34,6 +26,7 @@ defaults:
 env:
   PYTHONUNBUFFERED: 1
   WXPYTHON_BUILD_ARGS: ${{ startsWith(github.ref, 'refs/tags/') && '--release' || '' }}
+  BRANCH_NAME: docs_theme
 
 #---------------------------------------------------------------------------
 
@@ -50,6 +43,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
+          ref: ${{ env.BRANCH_NAME }}
           submodules: 'recursive'
           fetch-depth: 0
 
@@ -175,6 +169,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
+          ref: ${{ env.BRANCH_NAME }}
           submodules: 'recursive'
 
       - name: download CI source artifact
@@ -250,15 +245,17 @@ jobs:
           name: wxPython-wheel-${{ steps.init.outputs.canonical_id }}
           path: dist/wxpython-*.whl
 
+#---------------------------------------------------------------------------
+
   build-documentation:
     name: Build wxPython documentation
-    if: github.event_name == 'push'
     runs-on: windows-2022
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
+          ref: ${{ env.BRANCH_NAME }}
           submodules: 'recursive'
           fetch-depth: 0
 
@@ -291,78 +288,3 @@ jobs:
           name: docs
           path: dist/wxPython-docs*.tar.gz
 
-
-  publish-to-pypi:
-    name: Publish Python distribution to PyPI
-    if: startsWith(github.ref, 'refs/tags/')
-    needs: build-wheels
-    runs-on: ubuntu-22.04
-
-    environment:
-      name: pypi
-      url: https://pypi.org/p/wxPython
-
-    permissions:
-      id-token: write
-
-    steps:
-    - name: Download all the dists
-      uses: actions/download-artifact@v4
-      with:
-        pattern: wxPython-*
-        path: dist/
-        merge-multiple: true
-    - name: Publish distribution to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-
-
-  github-release:
-    name: Create GitHub Release and upload source
-    needs: publish-to-pypi
-    runs-on: ubuntu-22.04
-
-    permissions:
-      contents: write
-      id-token: write
-
-    steps:
-    - name: Download source distribution
-      uses: actions/download-artifact@v4
-      with:
-        name: wxPython-source
-        path: dist
-    - name: Create GitHub Release
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      run: |
-        gh release create '${{ github.ref_name }}' \
-          --repo '${{ github.repository }}' \
-          --notes ""
-    - name: Upload source distribution to GitHub Release
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      run: |
-        gh release upload '${{ github.ref_name }}' dist/* \
-          --repo '${{ github.repository }}'
-
-
-  upload-wheels-to-snapshot-builds:
-    name: Upload wheels to snapshot-builds on wxpython.org
-    if: github.event_name == 'push'
-    needs: build-wheels
-    runs-on: ubuntu-22.04
-
-    steps:
-    - name: Download all the dists
-      uses: actions/download-artifact@v4
-      with:
-        path: dist/
-        merge-multiple: true
-    - name: Install SSH key
-      uses: shimataro/ssh-key-action@v2
-      with:
-        key: ${{ secrets.RIOBU_SSH_KEY }}
-        known_hosts: ${{ secrets.RIOBU_KNOWN_HOSTS }}
-    - name: SCP wheels
-      run: |
-        scp -p dist/* rbot.wxpython@riobu.com:snapshot-builds/
